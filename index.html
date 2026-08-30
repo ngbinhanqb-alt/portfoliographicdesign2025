@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Nguyen Binh An</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=Alex+Brush&display=swap" rel="stylesheet">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        :root {
+            /* MÀU CHỦ ĐẠO GỐC */
+            --red: #B22222;
+            --cream: #F4EBE1;
+
+            --font-title: 'Anton', sans-serif;
+            --font-body: 'Montserrat', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            --font-script: 'Alex Brush', cursive;
+        }
+
+        /* Ẩn con trỏ mặc định tuyệt đối */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+
+        body {
+            background-color: var(--cream); color: var(--red);
+            font-family: var(--font-body); overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection { background-color: var(--red); color: var(--cream); }
+
+        /* Lưới Noise Overlay */
+        .noise {
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none !important; opacity: 0.05; mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* ========================================= */
+        /* MÀN HÌNH CHỜ (LOADING SCREEN)             */
+        /* ========================================= */
+        .page-loader {
+            position: fixed; inset: 0; background-color: var(--red); z-index: 9999999;
+            display: flex; justify-content: center; align-items: center; transform-origin: top;
+        }
+        .page-loader-text {
+            font-family: var(--font-title); font-size: clamp(1.2rem, 3vw, 4rem); color: var(--cream);
+            text-transform: uppercase; letter-spacing: 5px; overflow: hidden; text-align: center; padding: 0 20px;
+        }
+        .page-loader-text span { display: inline-block; transform: translateY(100%); }
+
+        /* ========================================= */
+        /* CURSOR ĐẢO MÀU                            */
+        /* ========================================= */
+        .cursor-dot {
+            position: fixed; top: 0; left: 0; width: 14px; height: 14px; background-color: var(--red);
+            border-radius: 50%; transform: translate(-50%, -50%); z-index: 999999; 
+            pointer-events: none !important; transition: width 0.2s, height 0.2s, background-color 0.3s;
+        }
+        .cursor-ring {
+            position: fixed; top: 0; left: 0; width: 50px; height: 50px; border: 2.5px solid var(--red);
+            border-radius: 50%; transform: translate(-50%, -50%); z-index: 999998; pointer-events: none !important; 
+            transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s, border-color 0.3s;
+        }
+
+        body.is-hovering .cursor-dot { width: 0; height: 0; opacity: 0; }
+        body.is-hovering .cursor-ring { width: 80px; height: 80px; background-color: rgba(178, 34, 34, 0.15); border-color: transparent; }
+
+        body.cursor-invert .cursor-dot { background-color: var(--cream); }
+        body.cursor-invert .cursor-ring { border-color: var(--cream); }
+        body.cursor-invert.is-hovering .cursor-ring { background-color: rgba(244, 235, 225, 0.15); border-color: transparent;}
+        
+        body.modal-open .cursor-dot { background-color: var(--red) !important; }
+        body.modal-open .cursor-ring { border-color: var(--red) !important; }
+        body.modal-open.is-hovering .cursor-ring { background-color: rgba(178, 34, 34, 0.15) !important; border-color: transparent !important;}
+
+        /* ========================================= */
+        /* NỀN & KHUNG CHUNG                         */
+        /* ========================================= */
+        .bg-cream { background-color: var(--cream); color: var(--red); }
+        .bg-red { background-color: var(--red); color: var(--cream); }
+        .sec-block { padding: 150px 5% 120px 5%; position: relative; }
+        .sec-heading { font-family: var(--font-title); font-size: clamp(3.5rem, 8vw, 7rem); line-height: 0.9; margin-bottom: 20px; text-transform: uppercase;}
+        .sec-divider { width: 100%; height: 2px; background-color: currentColor; margin-bottom: 40px; opacity: 0.8;}
+
+        .marquee-wrapper { padding: 25px 0; overflow: hidden; display: flex; white-space: nowrap; font-family: var(--font-title); font-size: clamp(2rem, 4vw, 3rem); letter-spacing: 2px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; }
+        .marquee-content { display: flex; animation: marquee 20s linear infinite; }
+        .marquee-content span { padding: 0 40px; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* ========================================= */
+        /* FIXED NAV (KHÓA CHẾT TRANG ĐẦU)           */
+        /* ========================================= */
+        .hero-nav-top, .hero-nav-bottom {
+            position: absolute; left: 0; width: 100%; padding: 30px 5%; 
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; 
+            z-index: 100; color: var(--red); opacity: 0;
+        }
+        .hero-nav-top { top: 0; font-family: var(--font-title); font-size: 1.5rem; letter-spacing: 2px; }
+        .hero-nav-bottom { bottom: 0; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+        .hero-nav-top > div:last-child, .hero-nav-bottom > div:last-child { text-align: right; }
+        .nav-center { display: flex; gap: 4vw; justify-content: center; }
+        .magnetic-text { display: inline-block; padding: 10px; margin: -10px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* ========================================= */
+        /* HERO SECTION                              */
+        /* ========================================= */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; text-align: center; overflow: hidden; }
+        .hero-title-wrapper { perspective: 1500px; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: auto; margin-bottom: 20px;}
+        .flip-container { perspective: 1500px; z-index: 10; pointer-events: auto; opacity: 0; }
+        .flipper { position: relative; transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; transform-origin: center; display: flex; justify-content: center; align-items: center; }
+        .flip-container.flipped .flipper { transform: rotateX(180deg); }
+        .hero-front, .hero-back { backface-visibility: hidden; display: flex; justify-content: center; align-items: center; }
+        .hero-front { font-family: var(--font-title); font-size: clamp(4rem, 12vw, 15rem); line-height: 0.85; letter-spacing: 2px; text-transform: uppercase; color: var(--red); white-space: nowrap; margin: 0; }
+        .hero-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotateX(180deg); font-family: var(--font-script); font-size: clamp(3rem, 10vw, 10rem); color: var(--red); white-space: nowrap; margin: 0; display: flex; align-items: center; justify-content: center; }
+        .hero-subtitle { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 2px solid var(--red); padding: 12px 40px; border-radius: 50px; display: inline-block; transition: all 0.3s; opacity: 0; }
+        .hero-subtitle:hover { background-color: var(--red); color: var(--cream); }
+
+        /* ========================================= */
+        /* SECTIONS & BENTO GRID                     */
+        /* ========================================= */
+        .toc-list { display: flex; flex-direction: column; gap: 0; }
+        .toc-item { display: flex; justify-content: space-between; align-items: center; padding: 40px 0; border-bottom: 1px solid rgba(244, 235, 225, 0.3); font-family: var(--font-title); font-size: clamp(2.5rem, 6vw, 5rem); transition: all 0.4s; text-decoration: none; color: inherit; }
+        .toc-item:hover { padding-left: 30px; padding-right: 30px; background: rgba(244, 235, 225, 0.05); letter-spacing: 2px; }
+        .toc-num { font-family: var(--font-mono); font-size: clamp(1rem, 2vw, 1.5rem); opacity: 0.5; }
+
+        .about-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; align-items: stretch; margin-top: 40px;}
+        .about-img-wrapper { perspective: 1000px; width: 100%; height: 100%; }
+        .about-img-box { background-color: var(--red); border-radius: 12px; width: 100%; height: 100%; min-height: 500px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; transform-style: preserve-3d; box-shadow: 20px 20px 50px rgba(0,0,0,0.15); will-change: transform; }
+        .about-img-box img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); transition: filter 0.5s, transform 0.5s; }
+        .about-img-box:hover img { filter: grayscale(0%); transform: scale(1.05); }
+
+        .about-content h2 { font-family: var(--font-title); font-size: clamp(3rem, 5vw, 5.5rem); line-height: 1; letter-spacing: 1px; text-transform: uppercase; }
+        .about-subtitle { text-align: right; font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 30px; margin-top: 10px;}
+        .about-desc { font-family: var(--font-title); font-size: 1.1rem; line-height: 1.6; letter-spacing: 0.5px; margin-bottom: 20px; text-transform: uppercase;}
+        
+        .contact-bar { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; font-family: var(--font-title); font-size: 1rem; margin-top: 30px; padding-bottom: 25px; border-bottom: 2px solid var(--red); margin-bottom: 30px; }
+        .contact-item { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; transition: opacity 0.3s; }
+        .contact-item:hover { opacity: 0.6; }
+        .contact-item svg { width: 16px; height: 16px; fill: currentColor; }
+        
+        .edu-skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .block-title { font-family: var(--font-title); font-size: 3rem; margin-bottom: 15px; }
+        .edu-info, .skill-list { font-family: var(--font-title); font-size: 1.1rem; line-height: 1.6; letter-spacing: 0.5px; }
+        .skill-list li { list-style: none; margin-bottom: 5px; }
+
+        .software-icons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .sw-icon { display: inline-flex; justify-content: center; align-items: center; width: 45px; height: 45px; border-radius: 6px; font-family: var(--font-body); font-weight: 800; font-size: 1.2rem; color: #ffffff; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .sw-icon:hover { transform: translateY(-8px) scale(1.1); }
+        .sw-ai { background-color: #F89C0E; } .sw-ps { background-color: #2CA8FF; } .sw-pr { background-color: #DF73FF; }
+        .sw-ae { background-color: #8C92FF; } .sw-id { background-color: #FF3366; } .sw-lr { background-color: #33D6FF; }
+
+        .exp-list { display: flex; flex-direction: column; }
+        .exp-row { display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding: 50px 0; border-bottom: 1px solid rgba(244, 235, 225, 0.3); transition: background 0.3s; text-decoration: none; color: inherit;}
+        .exp-row:hover { background: rgba(244, 235, 225, 0.05); padding-left: 20px; }
+        .exp-role { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: rgba(244, 235, 225, 0.7); }
+        .exp-role span { display: block; color: var(--cream); font-size: 1.2rem; margin-bottom: 10px; }
+        .exp-info h4 { font-family: var(--font-title); font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 15px; letter-spacing: 1px; }
+        .exp-info p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
+
+        .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .bento-col-left { display: flex; }
+        .bento-col-right { display: flex; flex-direction: column; gap: 15px; }
+        .bento-row-bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; flex-grow: 1; }
+        
+        .bento-item {
+            background: var(--cream); color: var(--red); border-radius: 12px; display: flex; justify-content: center; align-items: center; text-align: center; text-decoration: none; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s;
+            width: 100%; height: 100%; cursor: none; position: relative; overflow: hidden;
+        }
+        .bento-item::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(178,34,34,0.1), transparent); transform: skewX(-20deg); transition: none; z-index: 1; }
+        .bento-item:hover::before { left: 150%; transition: left 0.6s ease; }
+        .bento-item::after { content: ''; position: absolute; inset: 0; background: rgba(178, 34, 34, 0.03); opacity: 0; transition: opacity 0.3s; }
+        
+        .bento-item:hover { transform: scale(0.98); box-shadow: inset 0 0 0 2px var(--red); }
+        .bento-item:hover::after { opacity: 1; }
+        .bento-item h4 { font-family: var(--font-title); text-transform: uppercase; letter-spacing: 1px; pointer-events: none; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2;}
+        .bento-item:hover h4 { transform: scale(1.15); }
+        
+        .item-branding { min-height: 400px; } .item-branding h4 { font-size: 2.5rem; }
+        .item-social { min-height: 200px; } .item-social h4 { font-size: 1.8rem; }
+        .item-tvc { min-height: 185px; } .item-tvc h4 { font-size: 1.2rem; }
+        .item-3d { min-height: 185px; } .item-3d h4 { font-size: 1.2rem; }
+        .item-dtp { min-height: 185px; } .item-dtp h4 { font-size: 1.2rem; }
+
+        /* ========================================= */
+        /* HORIZONTAL GALLERY                        */
+        /* ========================================= */
+        .horizontal-section { overflow: hidden; height: 100vh; position: relative; }
+        .horizontal-container { display: flex; width: 400vw; height: 100vh; }
+        .panel { width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 80px 5% 0; gap: 40px; }
+        .panel-bg-text { font-family: var(--font-title); font-size: clamp(3.5rem, 8vw, 6rem); color: var(--red); -webkit-text-stroke: 0; z-index: 3; white-space: normal; line-height: 1.1; text-align: center; margin-bottom: 10px; }
+        .project-grid { display: flex; gap: 40px; z-index: 2; width: 100%; max-width: 1200px; justify-content: center; align-items: center; flex-wrap: wrap; }
+        .project-img-wrapper { width: 45%; max-width: 500px; aspect-ratio: 16/10; background-color: var(--red); color: var(--cream); display: flex; justify-content: center; align-items: center; text-align: center; font-family: var(--font-title); font-size: 2rem; border-radius: 12px; box-shadow: 20px 20px 50px rgba(0,0,0,0.15); position: relative; overflow: hidden; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .project-img-wrapper:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
+        .project-img-wrapper img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; transition: transform 0.5s; }
+        .project-img-wrapper:hover img { transform: scale(1.05) rotate(1deg); }
+
+        /* ========================================= */
+        /* FOOTER CHUẨN XÁC ĐÃ FIX LỖI               */
+        /* ========================================= */
+        .footer-sec { 
+            position: relative; 
+            min-height: auto; 
+            display: flex; flex-direction: column; align-items: center; 
+            overflow: hidden; 
+            padding-top: 150px; 
+            padding-bottom: 90px; 
+        }
+        .footer-sec::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(244, 235, 225, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(244, 235, 225, 0.1) 1px, transparent 1px); background-size: 80px 80px; z-index: 1; pointer-events: none; }
+        
+        .footer-content { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        
+        .footer-tag { font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 20px; margin-bottom: 40px; }
+        .footer-tag span { display: block; width: 50px; height: 1px; background-color: var(--cream); }
+        
+        .footer-title-wrapper { perspective: 1000px; width: 100%; display: flex; justify-content: center;}
+        .footer-title { font-family: var(--font-title); font-size: clamp(4rem, 11vw, 13rem); line-height: 0.85; text-align: center; text-transform: uppercase; margin-bottom: 60px; will-change: transform; transform-style: preserve-3d; }
+        
+        .footer-buttons { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+        .btn-contact { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 18px 35px; font-family: var(--font-title); font-size: 1.2rem; text-decoration: none; transition: all 0.3s ease; border-radius: 50px; letter-spacing: 1px; position: relative; overflow: hidden; }
+        .btn-contact svg { width: 20px; height: 20px; fill: currentColor; stroke: currentColor; stroke-width: 0.5;}
+        
+        .btn-solid { background-color: var(--cream); color: var(--red); border: 2px solid var(--cream); }
+        .btn-solid:hover { background-color: transparent; color: var(--cream); }
+        .btn-outline { background-color: transparent; color: var(--cream); border: 2px solid var(--cream); }
+        .btn-outline:hover { background-color: var(--cream); color: var(--red); }
+        
+        .custom-divider { width: 100%; position: relative; display: flex; justify-content: flex-end; align-items: center; margin-top: 40px; margin-bottom: 30px; z-index: 2; height: 50px; }
+        .custom-divider-line { width: 100%; height: 1px; background-color: var(--cream); position: absolute; left: 0; }
+        .custom-divider-target { width: 40px; height: 40px; border: 1.5px solid var(--red); border-radius: 50%; background-color: var(--cream); display: flex; justify-content: center; align-items: center; margin-right: 15%; position: relative; z-index: 2; transition: transform 0.3s; }
+        .custom-divider-target:hover { transform: scale(1.2); }
+        .custom-divider-target::after { content: ''; width: 10px; height: 10px; background-color: var(--red); border-radius: 50%; }
+
+        .footer-bottom { 
+            width: 100vw; margin-left: -5vw; margin-right: -5vw; 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            position: relative; z-index: 2; 
+            border-top: 1px solid rgba(244, 235, 225, 0.2); border-bottom: 1px solid rgba(244, 235, 225, 0.2); 
+            background-color: transparent; 
+        }
+        .footer-link { display: flex; justify-content: center; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--cream); text-decoration: none; text-transform: uppercase; letter-spacing: 2px; transition: background 0.3s, color 0.3s; padding: 30px; border-right: 1px solid rgba(244, 235, 225, 0.2); }
+        .footer-link:last-child { border-right: none; }
+        .footer-link:hover { background-color: var(--cream); color: var(--red); }
+        .footer-link svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;}
+
+        /* NÚT BEHANCE NỔI (HIỆN KHI CUỘN) */
+        .sticky-behance-badge {
+            position: fixed; 
+            bottom: 30px; right: 30px; z-index: 100000;
+            background-color: var(--red); color: var(--cream); padding: 12px 24px; border-radius: 50px;
+            display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s, opacity 0.3s; border: 2px solid var(--cream);
+            opacity: 0; pointer-events: none; 
+        }
+        .sticky-behance-badge:hover { transform: translateY(-5px) scale(1.05); background-color: var(--cream); color: var(--red); border-color: var(--red); }
+        .sticky-behance-badge svg { width: 18px; height: 18px; fill: currentColor; }
+
+
+        /* ========================================= */
+        /* MODAL / POP-UP (FIX 100% KÍCH THƯỚC GỐC)  */
+        /* ========================================= */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200000;
+            background: rgba(178, 34, 34, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content {
+            width: 95%; max-width: 1400px; height: 90vh; 
+            background: var(--cream); border-radius: 20px;
+            display: flex; flex-direction: column; overflow: hidden; 
+            transform: translateY(100px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+        
+        .modal-header {
+            padding: 30px 40px; background: var(--cream); 
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid rgba(178, 34, 34, 0.1);
+            z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .modal-title { font-family: var(--font-title); font-size: clamp(2rem, 4vw, 3.5rem); color: var(--red); margin: 0; text-transform: uppercase; line-height: 1; }
+        
+        .modal-close {
+            background: var(--red); color: var(--cream); border: none; padding: 12px 30px; border-radius: 50px;
+            font-family: var(--font-title); font-size: 1.2rem; cursor: none;
+            box-shadow: 0 5px 15px rgba(178, 34, 34, 0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal-close:hover { transform: scale(1.05); background-color: #8a1919; }
+        .modal-close span { font-family: var(--font-mono); font-size: 0.8rem; opacity: 0.7; }
+
+        .modal-body { padding: 40px; overflow-y: auto; flex-grow: 1; overscroll-behavior: contain; }
+        .modal-body::-webkit-scrollbar { width: 10px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(178, 34, 34, 0.3); border-radius: 10px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: rgba(178, 34, 34, 0.7); }
+        
+        /* FIX: Ép width 100% để hình ảnh bung to hết khung Popup, không bị thu nhỏ */
+        .modal-gallery { display: flex; flex-direction: column; gap: 40px; align-items: center; padding-bottom: 30px;}
+        .modal-gallery img, .modal-gallery video { 
+            width: 100%; height: auto; /* BẮT BUỘC RỘNG 100% CỦA MODAL */
+            border-radius: 12px; display: block; margin: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0; transform: translateY(50px);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .about-grid { grid-template-columns: 1fr; }
+            .exp-row { grid-template-columns: 1fr; gap: 15px; padding: 40px 0; }
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-row-bottom { grid-template-columns: 1fr; }
+            .project-grid { flex-direction: column; }
+            .project-img-wrapper { width: 90%; }
+            .footer-bottom { grid-template-columns: 1fr 1fr; }
+            .footer-link:nth-child(2) { border-right: none; }
+            .footer-link:nth-child(1), .footer-link:nth-child(2) { border-bottom: 1px solid rgba(244, 235, 225, 0.2); }
+        }
+        @media (max-width: 768px) {
+            .hero-nav-top .nav-center, .hero-nav-bottom .nav-center { display: none; }
+            .cursor-dot, .cursor-ring { display: none; }
+            .sec-block { padding: 100px 5%; }
+            .footer-buttons { flex-direction: column; width: 100%; padding: 0 20px; }
+            .btn-contact { width: 100%; }
+            .sticky-behance-badge { bottom: 20px; right: 20px; padding: 10px 16px; }
+            .hero-nav-top, .hero-nav-bottom { padding: 20px 5%; font-size: 0.9rem; }
+            .modal-header { padding: 20px; flex-direction: column; gap: 15px;}
+            .modal-body { padding: 20px; }
+            .footer-bottom { grid-template-columns: 1fr; border-left: none; border-right: none;}
+            .footer-link { border-right: none; border-bottom: 1px solid rgba(244, 235, 225, 0.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH CHỜ LOADING (KHÓA LƯỚT CHUỘT) -->
+    <div class="page-loader">
+        <div class="page-loader-text"><span>PORTFOLIO_GRAPHIC_DESIGN_2025_V2</span></div>
+    </div>
+
+    <!-- HIỆU ỨNG NHIỄU HẠT & CON TRỎ CHUỘT -->
+    <div class="noise"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
+    <!-- WRAPPER NỘI DUNG CHÍNH -->
+    <div>
+        <div>
+            <!-- 1. HERO SECTION -->
+            <section class="hero bg-cream" id="hero-sec">
+                
+                <!-- THANH ĐIỀU HƯỚNG TRANG ĐẦU TIÊN (ĐÃ LOCK KHÔNG CUỘN THEO TRANG) -->
+                <div class="hero-nav-top">
+                    <div class="magnetic-text hover-target">2025/11</div>
+                    <div class="nav-center">
+                        <div class="magnetic-text hover-target">PORTFOLIO</div>
+                        <div class="magnetic-text hover-target">CREATIVE</div>
+                    </div>
+                    <div class="magnetic-text hover-target">NGUYEN AN</div>
+                </div>
+
+                <div class="hero-nav-bottom">
+                    <div class="magnetic-text hover-target">DA NANG CITY</div>
+                    <div class="nav-center">
+                        <div class="magnetic-text hover-target">PORTFOLIO.2025.V2</div>
+                    </div>
+                    <div class="magnetic-text hover-target">NGBINHAN.QB@GMAIL.COM</div>
+                </div>
+
+                <div class="hero-title-wrapper">
+                    <div class="flip-container hover-target" onclick="this.classList.toggle('flipped')">
+                        <div class="flipper text-3d-hero">
+                            <div class="hero-front">NGUYEN BINH AN</div>
+                            <div class="hero-back">Graphic Design</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-subtitle hover-target">GRAPHIC DESIGNER & MULTIMEDIA EDITOR</div>
+            </section>
+
+            <div class="marquee-wrapper bg-red bg-trigger">
+                <div class="marquee-content hover-target">
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                </div>
+            </div>
+
+            <!-- 2. CONTENT / TOC -->
+            <section class="sec-block bg-red bg-trigger">
+                <h2 class="sec-heading gs-reveal">CONTENT</h2>
+                <div class="toc-list">
+                    <a href="#about-sec" class="toc-item hover-target gs-reveal"><span>ABOUT ME</span> <span class="toc-num">01</span></a>
+                    <a href="#exp-sec" class="toc-item hover-target gs-reveal"><span>WORK EXPERIENCE</span> <span class="toc-num">02</span></a>
+                    <a href="#portfolio-sec" class="toc-item hover-target gs-reveal"><span>PORTFOLIO HIGHLIGHTS</span> <span class="toc-num">03</span></a>
+                </div>
+            </section>
+
+            <div class="marquee-wrapper bg-cream">
+                <div class="marquee-content hover-target">
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                </div>
+            </div>
+
+            <!-- 3. ABOUT ME -->
+            <section class="sec-block bg-cream" id="about-sec">
+                <div class="about-grid">
+                    <div class="about-img-wrapper hover-target gs-reveal">
+                        <div class="about-img-box text-3d-img">
+                            <img src="tobi.png" alt="Portrait">
+                        </div>
+                    </div>
+                    
+                    <div class="about-content gs-reveal">
+                        <h2>HELLO! I AM NGUYEN BINH AN</h2>
+                        <div class="about-subtitle">GRAPHIC DESIGNER - MULTIMEDIA EDITOR</div>
+                        <p class="about-desc">I AM A PROMISING CREATIVE SPECIALIST CURRENTLY BASED IN DA NANG. WITH 3 MONTHS OF HANDS-ON EXPERIENCE IN DESIGN, MY FOCUS IS PRIMARILY ON GRAPHIC DESIGN (BRANDING AND ADVERTISING), ENSURING CREATIVE OUTPUT CONSISTENTLY ALIGNS WITH BRAND STRATEGY AND DELIVERS VALUE.</p>
+                        <p class="about-desc">MY TECHNICAL PROFICIENCY IS COMPREHENSIVE: I AM FULLY PROFICIENT IN THE ADOBE CREATIVE SUITE FOR STATIC DESIGN, AND POSSESS SKILLS AS A MULTIMEDIA EDITOR, EFFECTIVELY UTILIZING TOOLS LIKE ADOBE PREMIERE PRO (PR) AND ADOBE AFTER EFFECTS (AE).</p>
+                        
+                        <div class="contact-bar">
+                            <span class="contact-item">
+                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> 12/12/2005
+                            </span>
+                            <a href="mailto:NGBINHAN.QB@GMAIL.COM" class="contact-item hover-target">
+                                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> NGBINHAN.QB@GMAIL.COM
+                            </a>
+                            <a href="https://BEHANCE.NET/BNHANNGUYN6" target="_blank" class="contact-item hover-target">
+                                <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg> BEHANCE.NET/BNHANNGUYN6
+                            </a>
+                            <a href="tel:+840854453668" class="contact-item hover-target">
+                                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg> (+84) 0854453668
+                            </a>
+                        </div>
+
+                        <div class="edu-skills-grid">
+                            <div>
+                                <div class="block-title">EDUCATION</div>
+                                <div class="edu-info">FPT POLYTECHNIC | 2023 - 2026<br>GRAPHIC DESIGN</div>
+                                <div class="block-title" style="margin-top: 35px;">SOFTWARE</div>
+                                <div class="software-icons hover-target">
+                                    <span class="sw-icon sw-ai">Ai</span><span class="sw-icon sw-ps">Ps</span><span class="sw-icon sw-pr">Pr</span>
+                                    <span class="sw-icon sw-ae">Ae</span><span class="sw-icon sw-id">Id</span><span class="sw-icon sw-lr">Lr</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="block-title">KEY SKILLS</div>
+                                <ul class="skill-list">
+                                    <li>BRAND STRATEGY - IDENTITY</li><li>VISUAL COMMUNICATION</li><li>POST-PRODUCTION LEADERSHIP</li>
+                                    <li>GRAPHIC - LAYOUT DESIGN</li><li>CREATIVE CONCEPT DEVELOPMENT</li><li>VIDEO EDITING - MOTION</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="marquee-wrapper bg-red bg-trigger">
+                <div class="marquee-content hover-target">
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                </div>
+            </div>
+
+            <!-- 4. WORK EXPERIENCE -->
+            <section class="sec-block bg-red bg-trigger" id="exp-sec">
+                <h2 class="sec-heading gs-reveal">WORK EXPERIENCE</h2>
+                <div class="exp-list">
+                    <a href="#" class="exp-row hover-target gs-reveal">
+                        <div class="exp-role"><span>Sole Designer</span> Brand Identity</div>
+                        <div class="exp-info"><h4>CIP LOTUS LOGISTICS</h4><p>Single-handedly developed and implemented a complete, modern brand identity system for a B2B logistics client, focusing on scalability and professional appeal.</p></div>
+                    </a>
+                    <a href="#" class="exp-row hover-target gs-reveal">
+                        <div class="exp-role"><span>Contributor / Editor</span> Freelance</div>
+                        <div class="exp-info"><h4>7 HEARTS STUDIO</h4><p>Contributed to the initial conceptualization and visual development of the studio's new logo and brand identity. Executed video editing tasks.</p></div>
+                    </a>
+                    <a href="#" class="exp-row hover-target gs-reveal">
+                        <div class="exp-role"><span>Team Leader</span> Strategy</div>
+                        <div class="exp-info"><h4>MỘC CAFE & MỘC TRÀ</h4><p>Led the project team to define the core values and mission statement for the brand identity. Conducted market analysis.</p></div>
+                    </a>
+                    <a href="#" class="exp-row hover-target gs-reveal">
+                        <div class="exp-role"><span>Team Leader</span> Post Production</div>
+                        <div class="exp-info"><h4>STING ENERGY DRINK TVC</h4><p>Led a cross-functional post-production team, overseeing the entire video production workflow for the high-profile TV commercial.</p></div>
+                    </a>
+                </div>
+            </section>
+
+            <div class="marquee-wrapper bg-cream">
+                <div class="marquee-content hover-target">
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                    <span>BRANDING</span><span>•</span><span>UI/UX</span><span>•</span><span>VIDEO EDITING</span><span>•</span><span>POST PRODUCTION</span><span>•</span>
+                </div>
+            </div>
+
+            <!-- 5. HIGHLIGHTS CÓ GẮN LINK MỞ POPUP -->
+            <section class="sec-block bg-red bg-trigger" id="portfolio-sec">
+                <h2 class="sec-heading gs-reveal" style="color:var(--cream); border-bottom: none;">HIGHLIGHTS</h2>
+                <div class="sec-divider gs-reveal"></div>
+                <div class="bento-grid gs-reveal">
+                    <div class="bento-col-left">
+                        <a href="#" class="bento-item item-branding hover-target modal-trigger" data-target="popup-branding"><h4>BRANDING</h4></a>
+                    </div>
+                    <div class="bento-col-right">
+                        <a href="#" class="bento-item item-social hover-target modal-trigger" data-target="popup-social"><h4>SOCIAL MEDIA</h4></a>
+                        <div class="bento-row-bottom">
+                            <a href="#" class="bento-item item-tvc hover-target modal-trigger" data-target="popup-tvc"><h4>TVC EDITOR</h4></a>
+                            <a href="#" class="bento-item item-3d hover-target modal-trigger" data-target="popup-3d"><h4>3D RENDER</h4></a>
+                            <a href="#" class="bento-item item-dtp hover-target modal-trigger" data-target="popup-dtp"><h4>DTP DESIGN</h4></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. HORIZONTAL GALLERY -->
+            <section class="horizontal-section bg-cream" id="gallery-sec">
+                <div class="horizontal-container">
+                    <div class="panel">
+                        <div class="panel-bg-text">BRANDING</div>
+                        <div class="project-grid">
+                            <div class="project-img-wrapper hover-target"><img src="brd1.1.png" alt="Branding"></div>
+                            <div class="project-img-wrapper hover-target" style="transform: translateY(40px);"><img src="brd1.2.png" alt="Branding"></div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-bg-text">SOCIAL MEDIA</div>
+                        <div class="project-grid">
+                            <div class="project-img-wrapper hover-target" style="width: 70%; max-width: 800px;"><img src="pts1.2.png" alt="Social Media"></div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-bg-text">TVC EDITOR</div>
+                        <div class="project-grid">
+                            <div class="project-img-wrapper hover-target" style="width: 70%; max-width: 800px;"><img src="tvc1.5.png" alt="TVC"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. FOOTER CHUẨN XÁC ĐÃ FIX LỖI -->
+            <section class="footer-sec bg-red bg-trigger" id="footer-sec">
+                <div class="footer-content">
+                    <div class="footer-tag gs-reveal"><span></span> 04 // LET'S CONNECT <span></span></div>
+                    <div class="footer-title-wrapper gs-reveal hover-target">
+                        <h2 class="footer-title text-3d-footer">CREATING NEW<br>STANDARDS.</h2>
+                    </div>
+                    <div class="footer-buttons gs-reveal">
+                        <a href="mailto:ngbinhan.qb@gmail.com" class="btn-contact btn-solid hover-target">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> NGBINHAN.QB@GMAIL.COM
+                        </a>
+                        <a href="tel:+840854453668" class="btn-contact btn-outline hover-target">
+                            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg> (+84) 0854453668
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="custom-divider gs-reveal"><div class="custom-divider-line"></div><div class="custom-divider-target hover-target"></div></div>
+                
+                <div class="footer-bottom gs-reveal">
+                    <div class="footer-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> LIEN CHIEU, DA NANG</div>
+                    <a href="https://facebook.com/nguyenan0512" target="_blank" class="footer-link hover-target"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg> FACEBOOK</a>
+                    <a href="https://linkedin.com/in/nguyenan121225" target="_blank" class="footer-link hover-target"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg> LINKEDIN</a>
+                    <a href="https://www.behance.net/gallery/239733961/Portfolio-Graphic-Design-2025-V2" target="_blank" class="footer-link hover-target"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg> BEHANCE</a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- DANH SÁCH POPUP (ẢNH ĐỒNG BỘ 100%)                        -->
+    <!-- ========================================================= -->
+
+    <!-- POP-UP 1: BRANDING -->
+    <div class="modal-overlay" id="popup-branding">
+        <div class="modal-content" data-lenis-prevent>
+            <div class="modal-header">
+                <h3 class="modal-title">BRANDING PROJECTS</h3>
+                <button class="modal-close hover-target">CLOSE X <span>[ESC]</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <img src="tobi2.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi3.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi4.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi5.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi6.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi7.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi8.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi9.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi10.png" class="gallery-img" alt="Project Image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP 2: SOCIAL MEDIA -->
+    <div class="modal-overlay" id="popup-social">
+        <div class="modal-content" data-lenis-prevent>
+            <div class="modal-header">
+                <h3 class="modal-title">SOCIAL MEDIA</h3>
+                <button class="modal-close hover-target">CLOSE X <span>[ESC]</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <img src="tobi10.1.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi11.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi12.png" class="gallery-img" alt="Project Image">
+                    <img src="tobi13.png" class="gallery-img" alt="Project Image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP 3: TVC EDITOR -->
+    <div class="modal-overlay" id="popup-tvc">
+        <div class="modal-content" data-lenis-prevent>
+            <div class="modal-header">
+                <h3 class="modal-title">TVC EDITOR</h3>
+                <button class="modal-close hover-target">CLOSE X <span>[ESC]</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <!-- FIX: ĐÃ GỠ AUTOPLAY ĐỂ VIDEO KHÔNG TỰ CHẠY NGẦM -->
+                    <video class="gallery-img" loop muted playsinline controls preload="metadata">
+                        <source src="tobivid2.mp4" type="video/mp4">
+                    </video>
+                    <video class="gallery-img" loop muted playsinline controls preload="metadata">
+                        <source src="tobivid1.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP 4: 3D RENDER -->
+    <div class="modal-overlay" id="popup-3d">
+        <div class="modal-content" data-lenis-prevent>
+            <div class="modal-header">
+                <h3 class="modal-title">3D RENDER</h3>
+                <button class="modal-close hover-target">CLOSE X <span>[ESC]</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <img src="tobi3d.png" class="gallery-img" alt="3D Project">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP 5: DTP DESIGN -->
+    <div class="modal-overlay" id="popup-dtp">
+        <div class="modal-content" data-lenis-prevent>
+            <div class="modal-header">
+                <h3 class="modal-title">DTP DESIGN</h3>
+                <button class="modal-close hover-target">CLOSE X <span>[ESC]</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-gallery">
+                    <img src="tobibc1.1.png" class="gallery-img" alt="Project Image">
+                    <img src="tobibc1.2.png" class="gallery-img" alt="Project Image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STICKY BEHANCE BADGE (NÚT BẤM NỔI - ẨN Ở TRANG ĐẦU, HIỆN KHI CUỘN) -->
+    <a href="https://www.behance.net/gallery/239733961/Portfolio-Graphic-Design-2025-V2" target="_blank" class="sticky-behance-badge hover-target">
+        <span class="badge-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        </span>
+        <span class="badge-text">Xem đầy đủ trên Behance</span>
+    </a>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Khóa cuộn khi đang tải
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+        lenis.stop(); 
+
+        // 1. HIỆU ỨNG VÀO TRANG MỚI (PAGE LOAD REVEAL)
+        window.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline({
+                onComplete: () => lenis.start() // Bật lại cuộn trang sau khi hiệu ứng chạy xong
+            });
+            
+            tl.to('.page-loader-text span', { y: 0, duration: 1.2, ease: "power4.out", delay: 0.2 })
+              .to('.page-loader', { scaleY: 0, duration: 1.2, ease: "power4.inOut", delay: 0.8 })
+              // Hiện 2 thanh Nav
+              .to('.hero-nav-top', { opacity: 1, duration: 0.1 }, "-=0.5")
+              .fromTo('.hero-nav-top > div', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: "power3.out" }, "-=0.5")
+              .to('.hero-nav-bottom', { opacity: 1, duration: 0.1 }, "-=0.8")
+              .fromTo('.hero-nav-bottom > div', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: "power3.out" }, "-=0.8")
+              // Hiện chữ Title bự NGUYEN BINH AN
+              .fromTo('.flip-container', { opacity: 0 }, { opacity: 1, duration: 0.1 }, "-=1")
+              .fromTo('.hero-front', { y: 150, rotationX: -20, scale: 0.9 }, { y: 0, rotationX: 0, scale: 1, duration: 1.2, ease: "power4.out" }, "-=1.2")
+              // Phóng to chữ subtitle
+              .fromTo('.hero-subtitle', { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.5)" }, "-=0.7");
+        });
+
+        // 3. Logic điều khiển Cursor thông minh
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorRing = document.querySelector('.cursor-ring');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let ringX = mouseX, ringY = mouseY;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            gsap.to(cursorDot, { x: mouseX, y: mouseY, duration: 0, ease: "none" });
+        });
+
+        gsap.ticker.add(() => {
+            ringX += (mouseX - ringX) * 0.15; 
+            ringY += (mouseY - ringY) * 0.15;
+            gsap.to(cursorRing, { x: ringX, y: ringY, duration: 0, ease: "none" });
+        });
+
+        // Hiệu ứng Hover Cursor
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('a, button, .hover-target, .bento-item, .modal-close, .magnetic-text')) {
+                document.body.classList.add('is-hovering');
+            }
+        });
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.closest('a, button, .hover-target, .bento-item, .modal-close, .magnetic-text')) {
+                document.body.classList.remove('is-hovering');
+            }
+        });
+
+        // 4. TỰ ĐỘNG ĐỔI MÀU NAV & CHUỘT KHI CUỘN QUA NỀN ĐỎ
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.querySelectorAll('.bg-trigger').forEach(sec => {
+            ScrollTrigger.create({
+                trigger: sec,
+                start: "top 50%", 
+                end: "bottom 50%", 
+                onEnter: () => document.body.classList.add('cursor-invert'),
+                onLeave: () => document.body.classList.remove('cursor-invert'),
+                onEnterBack: () => document.body.classList.add('cursor-invert'),
+                onLeaveBack: () => document.body.classList.remove('cursor-invert')
+            });
+        });
+
+        // 4.1 LÀM ẨN NÚT BEHANCE Ở TRANG ĐẦU, HIỆN KHI CUỘN XUỐNG
+        ScrollTrigger.create({
+            trigger: "#hero-sec",
+            start: "bottom 80%", // Khi cuộn qua 80% trang đầu thì nút sẽ hiện
+            onEnter: () => gsap.to('.sticky-behance-badge', { opacity: 1, pointerEvents: 'auto', duration: 0.3 }),
+            onLeaveBack: () => gsap.to('.sticky-behance-badge', { opacity: 0, pointerEvents: 'none', duration: 0.3 })
+        });
+
+        // 5. Hiệu ứng Magnetic (Từ tính hút chuột) cho chữ trên Top/Bottom Nav
+        document.querySelectorAll('.magnetic-text').forEach(text => {
+            text.addEventListener('mousemove', (e) => {
+                const rect = text.getBoundingClientRect();
+                const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+                const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+                gsap.to(text, { x: x, y: y, duration: 0.3, ease: 'power2.out' });
+            });
+            text.addEventListener('mouseleave', () => {
+                gsap.to(text, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+
+        // 6. Hiệu ứng 3D nhấp nhô cho hình ảnh/chữ bự
+        function apply3DEffect(sectionSelector, textSelector, intensityX, intensityY) {
+            const section = document.querySelector(sectionSelector);
+            const textElement = document.querySelector(textSelector);
+            if(section && textElement) {
+                section.addEventListener('mousemove', (e) => {
+                    const rect = section.getBoundingClientRect();
+                    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2; const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * intensityX; 
+                    const rotateY = ((x - centerX) / centerX) * intensityY;
+                    gsap.to(textElement, { rotateX: rotateX, rotateY: rotateY, duration: 0.5, ease: "power2.out" });
+                });
+                section.addEventListener('mouseleave', () => {
+                    gsap.to(textElement, { rotateX: 0, rotateY: 0, duration: 1, ease: "elastic.out(1, 0.3)" });
+                });
+            }
+        }
+        apply3DEffect('#hero-sec', '.text-3d-hero', -15, 15);
+        apply3DEffect('.about-img-wrapper', '.text-3d-img', -15, 15);
+        apply3DEffect('#footer-sec', '.text-3d-footer', -20, 20);
+
+        // 7. Hiệu ứng Zoom Reveal khi cuộn xuống
+        gsap.utils.toArray('.gs-reveal').forEach(elem => {
+            gsap.fromTo(elem, 
+                { y: 60, opacity: 0, scale: 0.95 }, 
+                { y: 0, opacity: 1, scale: 1, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: elem, start: "top 85%" } }
+            );
+        });
+
+        // 8. Ngàm cố định cuộn ngang
+        const horizontalSection = document.querySelector('.horizontal-section');
+        if (horizontalSection) {
+            const horizontalContainer = document.querySelector('.horizontal-container');
+            const panels = gsap.utils.toArray('.panel');
+            gsap.to(panels, {
+                xPercent: -100 * (panels.length - 1), ease: "none",
+                scrollTrigger: { trigger: horizontalSection, pin: true, scrub: 1, snap: 1 / (panels.length - 1), end: () => "+=" + horizontalContainer.offsetWidth }
+            });
+        }
+
+        // 9. LOGIC POPUP KẾT HỢP XỬ LÝ VIDEO THÔNG MINH
+        const modalTriggers = document.querySelectorAll('.modal-trigger');
+        const modalOverlays = document.querySelectorAll('.modal-overlay');
+        const modalCloses = document.querySelectorAll('.modal-close');
+
+        modalTriggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = trigger.getAttribute('data-target');
+                const targetModal = document.getElementById(targetId);
+                
+                if (targetModal) {
+                    targetModal.classList.add('active'); 
+                    document.body.classList.add('modal-open'); 
+                    lenis.stop(); // Khóa cuộn trang nền
+                    
+                    targetModal.querySelector('.modal-body').scrollTop = 0;
+
+                    // FIX: KÍCH HOẠT PHÁT VIDEO KHI MỞ POPUP
+                    const videos = targetModal.querySelectorAll('video');
+                    videos.forEach(vid => vid.play());
+
+                    // GSAP Animation: Ảnh bay lên tuần tự
+                    const images = targetModal.querySelectorAll('.gallery-img');
+                    gsap.to(images, {
+                        y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out", delay: 0.2
+                    });
+                }
+            });
+        });
+
+        const closeModal = () => {
+            modalOverlays.forEach(modal => {
+                modal.classList.remove('active');
+                
+                // FIX: DỪNG TOÀN BỘ VIDEO KHI ĐÓNG POPUP ĐỂ KHÔNG CHẠY NGẦM
+                const videos = modal.querySelectorAll('video');
+                videos.forEach(vid => vid.pause());
+
+                // Trả ảnh về trạng thái ẩn để lần sau mở lại có hiệu ứng bay lên
+                const images = modal.querySelectorAll('.gallery-img');
+                gsap.to(images, { y: 50, opacity: 0, duration: 0.3 }); 
+            });
+            document.body.classList.remove('modal-open');
+            lenis.start(); // Mở lại cuộn trang nền
+        };
+
+        modalCloses.forEach(btn => btn.addEventListener('click', closeModal));
+
+        modalOverlays.forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal();
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.classList.contains('modal-open')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
